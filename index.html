@@ -632,10 +632,7 @@ function renderFullArticle(container, a){
 
 async function generateFullArticle(item){
   try{
-    const res=await fetch('/api/summarize',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1200,
-        messages:[{role:'user',content:`You are a content strategist writing for Isha — a sharp strategist, leader, and personal brand builder moving from Mumbai to Milan. Her voice: confident, direct, warm, never try-hard. She loves: strategy, leadership, automotive/F1, branding, tech, mindset.
+    const prompt=`You are a content strategist writing for Isha — a sharp strategist, leader, and personal brand builder moving from Mumbai to Milan. Her voice: confident, direct, warm, never try-hard. She loves: strategy, leadership, automotive/F1, branding, tech, mindset.
 
 Based on this saved content:
 Title: ${item.title}
@@ -645,13 +642,25 @@ Format: ${item.brief?.format||'LinkedIn'}
 
 Write a full article brief. Return ONLY valid JSON:
 {
-  "hook": string (one powerful opening line that stops the scroll, max 120 chars),
-  "intro": string (2-3 sentences setting up the argument, written in Isha's voice),
-  "keyPoints": array of 4 strings (the key ideas/arguments, each 1-2 sentences, punchy),
-  "body": string (3-4 sentences expanding the core argument with Isha's perspective),
-  "conclusion": string (2-3 sentences — insight + call to action or reflection, ends strong)
+  "hook": "one powerful opening line that stops the scroll, max 120 chars",
+  "intro": "2-3 sentences setting up the argument in Isha voice",
+  "keyPoints": ["key idea 1", "key idea 2", "key idea 3", "key idea 4"],
+  "body": "3-4 sentences expanding the core argument",
+  "conclusion": "2-3 sentences ending strong with insight or CTA"
 }
 
+Return ONLY the JSON object. No markdown.`;
+    const res=await fetch('/api/summarize',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
+    });
+    const data=await res.json();
+    const text=(data.text||'').replace(/```json
+?/g,'').replace(/
+?```/g,'').trim();
+    return JSON.parse(text);
+  }catch(e){ return null; }
+}
 Return ONLY JSON. No markdown.`}]})
     });
     const data=await res.json();
@@ -665,19 +674,19 @@ async function refreshIdeas(){ renderIdeas(); }
 
 /* ---- SAVE ALL ---- */
 async function callAI(prompt, imageB64, imageMime){
-  const content=[];
-  if(imageB64) content.push({type:'image',source:{type:'base64',media_type:imageMime,data:imageB64}});
-  content.push({type:'text',text:prompt});
+  const body={prompt};
+  if(imageB64){ body.imageBase64=imageB64; body.imageMime=imageMime; }
   const res=await fetch('/api/summarize',{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content}]})
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body)
   });
   const data=await res.json();
-  const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-  const clean=text.replace(/```json\n?/g,'').replace(/\n?```/g,'').trim();
-  try{ return JSON.parse(clean); }catch(e){ return null; }
+  const text=(data.text||'').replace(/```json
+?/g,'').replace(/
+?```/g,'').trim();
+  try{ return JSON.parse(text); }catch(e){ return null; }
 }
-
 function buildPrompt(source){
   return `You are a content intelligence assistant for Isha — a strategist, leader, and personal brand builder who loves: strategy, leadership, automotive/cars, F1, branding, tech, mindset. Moving to Milan for a Master's in Strategic Design.
 
@@ -825,14 +834,14 @@ function addTasteImages(input){
         const b64=e.target.result.split(',')[1];
         const res=await fetch('/api/summarize',{
           method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:80,
-            messages:[{role:'user',content:[
-              {type:'image',source:{type:'base64',media_type:file.type,data:b64}},
-              {type:'text',text:'If you can identify a specific font or typeface in this image, reply with ONLY the font name. If no font is identifiable, reply with exactly: none'}
-            ]}]})
+          body:JSON.stringify({
+            prompt:'If you can identify a specific font or typeface in this image, reply with ONLY the font name. If no font is identifiable, reply with exactly: none',
+            imageBase64:b64,
+            imageMime:file.type
+          })
         });
         const data=await res.json();
-        const fontName=((data.content||[])[0]?.text||'').trim();
+        const fontName=(data.text||'').trim();
         if(fontName&&fontName.toLowerCase()!=='none'&&fontName.length<60){
           item.font=fontName; persistTaste(); renderTaste();
         }
