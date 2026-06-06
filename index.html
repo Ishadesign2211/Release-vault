@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Release Output</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Bricolage+Grotesque:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f4f4f2; --surface: #ffffff; --surface2: #f8f8f6;
+  --border: rgba(0,0,0,0.07); --border2: rgba(0,0,0,0.11);
+  --text: #1a1a1a; --text2: #555; --text3: #999;
+  --accent-light: #f0f0ee;
+  --green: #2d7a4f; --green-bg: #edf7f1;
+  --amber: #92400e; --amber-bg: #fffbeb;
+  --rose: #9f1239; --rose-bg: #fff1f2;
+  --purple: #5b21b6; --purple-bg: #f5f3ff;
+  --sky: #0369a1; --sky-bg: #f0f9ff;
+  --radius-sm: 10px; --radius: 16px; --radius-lg: 20px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.09), 0 2px 6px rgba(0,0,0,0.05);
+}
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* Header */
+.header { background: linear-gradient(160deg,#dde8f5 0%,#e8edf5 40%,#f0eeec 100%); padding: 28px 32px 0; overflow: hidden; position: relative; }
+.header::after { content:''; position:absolute; top:-60px; right:-60px; width:240px; height:240px; background:radial-gradient(circle,rgba(255,255,255,0.5) 0%,transparent 70%); pointer-events:none; }
+.header-inner { max-width:900px; margin:0 auto; display:flex; align-items:flex-start; justify-content:space-between; padding-bottom:20px; }
+.breadcrumb { font-size:12px; color:var(--text3); margin-bottom:6px; }
+.header-title { font-family:'Bricolage Grotesque',sans-serif; font-size:28px; font-weight:700; letter-spacing:-0.03em; line-height:1.1; }
+.header-sub { font-size:13px; color:var(--text2); margin-top:4px; }
+.header-right { display:flex; gap:8px; margin-top:4px; }
+
+/* Tabs */
+.tabs-wrap { background:linear-gradient(160deg,#dde8f5 0%,#e8edf5 40%,#f0eeec 100%); border-bottom:1px solid var(--border2); }
+.tabs { max-width:900px; margin:0 auto; padding:0 32px; display:flex; }
+.tab { font-size:14px; font-weight:500; color:var(--text3); padding:12px 16px; cursor:pointer; border:none; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all 0.15s; background:none; font-family:'Inter',sans-serif; }
+.tab:hover { color:var(--text2); }
+.tab.active { color:var(--text); border-bottom-color:var(--text); }
+
+/* Shell */
+.shell { max-width:900px; margin:0 auto; padding:24px 32px 80px; }
+
+/* Nudge */
+.nudge { background:#fffbeb; border:1px solid #fcd34d; border-radius:var(--radius-sm); padding:11px 16px; display:none; align-items:center; gap:10px; margin-bottom:20px; font-size:13px; color:#92400e; }
+
+/* Add box */
+.add-box { background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-md); padding:20px 22px; margin-bottom:24px; border:1px solid var(--border); }
+.add-box-label { font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:14px; }
+.add-field { margin-bottom:10px; }
+.add-field-label { font-size:11px; color:var(--text3); font-weight:500; margin-bottom:5px; display:block; }
+.field-input { width:100%; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:0 14px; height:40px; font-size:14px; color:var(--text); font-family:'Inter',sans-serif; outline:none; transition:border-color 0.15s,box-shadow 0.15s; }
+.field-input:focus { border-color:#aaa; box-shadow:0 0 0 3px rgba(0,0,0,0.05); }
+.field-input::placeholder { color:var(--text3); }
+.field-textarea { width:100%; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:10px 14px; font-size:13px; color:var(--text); font-family:'Inter',sans-serif; resize:none; height:80px; outline:none; transition:border-color 0.15s; line-height:1.6; }
+.field-textarea:focus { border-color:#aaa; }
+.field-textarea::placeholder { color:var(--text3); }
+.field-file { width:100%; background:rgba(255,255,255,0.55); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1.5px dashed rgba(0,0,0,0.12); border-radius:var(--radius-sm); padding:9px 14px; font-size:13px; color:var(--text2); font-family:'Inter',sans-serif; cursor:pointer; outline:none; transition:all 0.2s; box-shadow:0 1px 4px rgba(0,0,0,0.04),inset 0 1px 0 rgba(255,255,255,0.8); }
+.field-file:hover { background:rgba(255,255,255,0.8); border-color:rgba(0,0,0,0.2); }
+.field-file:hover { border-color:#bbb; }
+.add-footer { border-top:1px solid var(--border); padding-top:14px; margin-top:14px; display:flex; align-items:center; justify-content:space-between; }
+.add-footer-hint { font-size:12px; color:var(--text3); }
+
+/* Buttons */
+.btn-primary { height:40px; padding:0 20px; background:var(--text); color:white; border:none; border-radius:var(--radius-sm); font-size:13px; font-weight:500; font-family:'Inter',sans-serif; cursor:pointer; white-space:nowrap; transition:opacity 0.15s,transform 0.1s; letter-spacing:-0.01em; }
+.btn-primary:hover { opacity:0.85; }
+.btn-primary:active { transform:scale(0.97); }
+.btn-primary:disabled { opacity:0.35; cursor:not-allowed; }
+.btn-secondary { height:40px; padding:0 16px; background:var(--surface2); color:var(--text2); border:1px solid var(--border2); border-radius:var(--radius-sm); font-size:13px; font-family:'Inter',sans-serif; cursor:pointer; white-space:nowrap; transition:all 0.15s; }
+.btn-secondary:hover { background:var(--accent-light); color:var(--text); border-color:#ccc; }
+.err { font-size:12px; color:#dc2626; background:#fef2f2; border-radius:6px; padding:7px 12px; margin-top:10px; display:none; }
+
+/* Stats — 3 only */
+.stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:24px; }
+.stat-card { background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px; border:1px solid var(--border); }
+.stat-n { font-family:'Bricolage Grotesque',sans-serif; font-size:30px; font-weight:700; color:var(--text); line-height:1; margin-bottom:4px; letter-spacing:-0.03em; }
+.stat-l { font-size:11px; color:var(--text3); font-weight:500; text-transform:uppercase; letter-spacing:0.06em; }
+
+/* Filters / pills */
+.toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.pills { display:flex; gap:6px; flex-wrap:wrap; }
+.pill { font-size:12px; padding:5px 14px; border-radius:99px; border:1px solid var(--border2); color:var(--text2); cursor:pointer; transition:all 0.15s; font-family:'Inter',sans-serif; background:var(--surface); }
+.pill:hover { border-color:#bbb; color:var(--text); }
+.pill.active { background:var(--text); color:white; border-color:var(--text); }
+
+/* Save cards — compact preview */
+.cards { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.save-card { background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:16px 16px 12px; display:flex; flex-direction:column; transition:box-shadow 0.2s,transform 0.15s,border-color 0.15s; position:relative; overflow:hidden; }
+.save-card:hover { box-shadow:var(--shadow-lg); transform:translateY(-1px); }
+.save-card.reviewed { opacity:0.5; }
+.card-bar { position:absolute; top:0; left:0; right:0; height:3px; }
+.card-badges { display:flex; align-items:center; gap:6px; margin-bottom:8px; margin-top:4px; flex-wrap:wrap; }
+.badge { font-size:10px; padding:3px 9px; border-radius:99px; font-weight:600; }
+.badge-Strategy { background:var(--purple-bg); color:var(--purple); }
+.badge-Leadership { background:var(--green-bg); color:var(--green); }
+.badge-Automotive { background:var(--amber-bg); color:var(--amber); }
+.badge-F1 { background:var(--rose-bg); color:var(--rose); }
+.badge-Branding { background:#fdf4ff; color:#7e22ce; }
+.badge-Tech { background:var(--sky-bg); color:var(--sky); }
+.badge-Mindset { background:#f0fdf4; color:#166534; }
+.badge-Other { background:#f9fafb; color:#6b7280; }
+.type-tag { font-size:10px; padding:2px 8px; border-radius:4px; border:1px solid var(--border2); color:var(--text3); background:var(--surface2); text-transform:uppercase; letter-spacing:0.04em; }
+.card-title { font-family:'Bricolage Grotesque',sans-serif; font-size:14px; font-weight:600; color:var(--text); line-height:1.35; letter-spacing:-0.02em; margin-bottom:5px; }
+.card-preview { font-size:12px; color:var(--text2); line-height:1.6; flex:1; margin-bottom:10px; }
+.card-idea-hint { font-size:11px; color:var(--sky); font-weight:500; margin-bottom:10px; cursor:pointer; }
+.card-idea-hint:hover { text-decoration:underline; }
+.card-foot { display:flex; align-items:center; justify-content:space-between; padding-top:10px; border-top:1px solid var(--border); margin-top:auto; }
+.card-date { font-size:11px; color:var(--text3); }
+.card-actions { display:flex; gap:5px; }
+.act { font-size:11px; padding:3px 10px; border-radius:6px; border:1px solid var(--border2); background:transparent; color:var(--text3); cursor:pointer; font-family:'Inter',sans-serif; transition:all 0.12s; }
+.act:hover { color:var(--text); border-color:#bbb; background:var(--surface2); }
+.act.ok { background:var(--green-bg); color:var(--green); border-color:#a7f3d0; }
+.act.del:hover { color:#dc2626; border-color:#fca5a5; background:#fef2f2; }
+
+/* Card brief */
+.card-brief { background:#f8fdf9; border:1px solid #d1fae5; border-radius:10px; padding:11px 13px; margin-bottom:10px; }
+.brief-label { font-size:10px; font-weight:600; color:var(--green); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; }
+.brief-title { font-family:'Bricolage Grotesque',sans-serif; font-size:13px; font-weight:600; color:#1a3a2a; margin-bottom:4px; line-height:1.3; }
+.brief-angle { font-size:11.5px; color:#2d5a3d; line-height:1.55; margin-bottom:8px; font-style:italic; }
+.brief-points { list-style:none; margin-bottom:8px; display:flex; flex-direction:column; gap:3px; }
+.brief-points li { font-size:11px; color:#3a6b4a; display:flex; align-items:flex-start; gap:5px; line-height:1.5; }
+.brief-points li::before { content:'→'; font-size:10px; margin-top:2px; flex-shrink:0; opacity:0.6; }
+.format-tag { font-size:10px; padding:2px 10px; border-radius:99px; font-weight:600; }
+.format-LinkedIn { background:#dbeafe; color:#1d4ed8; }
+.format-Substack { background:#fef9c3; color:#854d0e; }
+.format-Both { background:#ede9fe; color:#5b21b6; }
+
+/* Loading */
+.loading-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 18px; display:flex; align-items:center; gap:12px; }
+.spin { width:16px; height:16px; border:2px solid var(--border2); border-top-color:var(--text2); border-radius:50%; animation:spin 0.7s linear infinite; flex-shrink:0; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.load-text { font-size:13px; color:var(--text3); }
+.load-text b { color:var(--text2); font-weight:500; }
+
+/* Empty */
+.empty { background:var(--surface); border:1px dashed var(--border2); border-radius:var(--radius-lg); padding:48px 24px; text-align:center; color:var(--text3); font-size:14px; grid-column:1/-1; }
+.empty p { max-width:240px; margin:8px auto 0; line-height:1.6; }
+
+/* Icon buttons */
+.card-icon-btn { width:30px; height:30px; border-radius:7px; border:1px solid var(--border2); background:transparent; color:var(--text3); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:all 0.12s; flex-shrink:0; }
+.card-icon-btn:hover { background:var(--surface2); color:var(--text); border-color:#bbb; }
+.card-icon-btn.del-btn:hover { color:#dc2626; border-color:#fca5a5; background:#fef2f2; }
+.card-icon-btn.copy-btn.copied { color:var(--green); border-color:#a7f3d0; background:var(--green-bg); }
+
+/* Card number + platform tag */
+.card-num { font-size:10px; color:var(--text3); font-weight:600; background:var(--surface2); border:1px solid var(--border2); border-radius:4px; padding:1px 6px; flex-shrink:0; }
+.platform-tag { font-size:10px; padding:2px 8px; border-radius:4px; border:1px solid var(--border2); color:var(--text3); background:var(--surface2); text-transform:uppercase; letter-spacing:0.04em; }
+
+/* Image toggle */
+.img-toggle { display:flex; gap:0; border:1px solid var(--border2); border-radius:8px; overflow:hidden; margin-bottom:8px; width:fit-content; }
+.img-toggle-btn { font-size:12px; padding:5px 14px; border:none; background:transparent; color:var(--text3); cursor:pointer; font-family:'Inter',sans-serif; font-weight:500; transition:all 0.15s; }
+.img-toggle-btn.active { background:var(--text); color:white; }
+
+/* Article ideas tab */
+.ideas-view { display:none; }
+.ideas-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.ideas-toolbar h2 { font-family:'Bricolage Grotesque',sans-serif; font-size:18px; font-weight:700; letter-spacing:-0.02em; }
+
+/* Horizontal article cards */
+.idea-list { display:flex; flex-direction:column; gap:10px; }
+.idea-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px 20px; display:flex; align-items:flex-start; gap:16px; cursor:pointer; transition:box-shadow 0.2s,transform 0.15s; }
+.idea-card:hover { box-shadow:var(--shadow-lg); transform:translateY(-1px); }
+.idea-card.expanded { border-color:var(--border2); }
+.idea-card-left { flex:1; min-width:0; }
+.idea-card-right { flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+.idea-title { font-family:'Bricolage Grotesque',sans-serif; font-size:16px; font-weight:700; color:var(--text); line-height:1.3; letter-spacing:-0.02em; margin-bottom:5px; }
+.idea-subtext { font-size:13px; color:var(--text2); line-height:1.6; margin-bottom:8px; }
+.idea-badges { display:flex; gap:6px; flex-wrap:wrap; }
+.chevron { font-size:16px; color:var(--text3); transition:transform 0.2s; margin-top:2px; }
+.idea-card.expanded .chevron { transform:rotate(180deg); }
+
+/* Full article expanded */
+.idea-expanded { display:none; padding:16px 20px 20px; background:var(--surface); border:1px solid var(--border); border-top:none; border-radius:0 0 var(--radius) var(--radius); margin-top:-10px; }
+.idea-expanded.open { display:block; }
+.article-section { margin-bottom:16px; }
+.article-section-label { font-size:10px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; }
+.article-section-content { font-size:13px; color:var(--text2); line-height:1.75; }
+.article-hook { font-family:'Bricolage Grotesque',sans-serif; font-size:16px; font-weight:600; color:var(--text); line-height:1.45; padding:14px 16px; background:var(--surface2); border-left:3px solid var(--text); border-radius:0 8px 8px 0; margin-bottom:16px; }
+.key-points { list-style:none; display:flex; flex-direction:column; gap:6px; }
+.key-points li { font-size:13px; color:var(--text2); display:flex; gap:8px; line-height:1.6; }
+.key-points li::before { content:'→'; color:var(--text3); flex-shrink:0; margin-top:1px; }
+.article-conclusion { font-size:13px; color:var(--text2); line-height:1.75; padding:12px 14px; background:#f8fdf9; border:1px solid #d1fae5; border-radius:8px; }
+.generating-msg { font-size:13px; color:var(--text3); display:flex; align-items:center; gap:8px; padding:8px 0; }
+
+/* Empty ideas */
+.ideas-empty { background:var(--surface); border:1px dashed var(--border2); border-radius:var(--radius-lg); padding:48px 24px; text-align:center; color:var(--text3); font-size:14px; }
+.ideas-empty p { max-width:280px; margin:8px auto 0; line-height:1.6; }
+
+
+/* Taste moodboard */
+.taste-dropzone { position:relative; min-height:200px; }
+.taste-drop-overlay { display:none; position:absolute; inset:0; background:rgba(99,102,241,0.08); border:2px dashed #6366f1; border-radius:var(--radius-lg); z-index:10; align-items:center; justify-content:center; }
+.taste-dropzone.dragging .taste-drop-overlay { display:flex; }
+.taste-add-btn { display:inline-flex; align-items:center; gap:6px; height:40px; padding:0 20px; background:var(--text); color:white; border:none; border-radius:var(--radius-sm); font-size:13px; font-weight:500; font-family:'Inter',sans-serif; cursor:pointer; white-space:nowrap; transition:opacity 0.15s,transform 0.1s; letter-spacing:-0.01em; }
+.taste-add-btn:hover { opacity:0.85; }
+.taste-add-btn:active { transform:scale(0.97); }
+body.taste-expanded { overflow:hidden; }
+.taste-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; }
+.taste-item { position:relative; border-radius:var(--radius); overflow:hidden; background:#000; aspect-ratio:1/1; cursor:zoom-in; }
+.taste-item img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+.taste-item-overlay { position:absolute; inset:0; display:none; background:linear-gradient(to top,rgba(0,0,0,0.22) 0%,transparent 55%); border-radius:inherit; pointer-events:none; }
+.taste-item:hover .taste-item-overlay { display:block; }
+.taste-font-label { position:absolute; bottom:10px; left:10px; display:none; font-size:11px; font-weight:500; color:rgba(255,255,255,0.9); background:rgba(0,0,0,0.5); padding:3px 8px; border-radius:4px; max-width:65%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none; }
+.taste-item:hover .taste-font-label { display:block; }
+.taste-item-actions { position:absolute; top:8px; right:8px; display:none; gap:4px; flex-direction:column; align-items:center; }
+.taste-item:hover .taste-item-actions { display:flex; }
+.taste-icon-btn { width:28px; height:28px; border-radius:7px; border:none; background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.85); cursor:pointer; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); transition:background 0.15s,color 0.15s; }
+.taste-icon-btn:hover { background:rgba(255,255,255,0.3); color:white; }
+
+/* Taste preview lightbox */
+.taste-preview-backdrop { display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); cursor:zoom-out; }
+.taste-preview-backdrop.active { display:block; }
+.taste-preview-img { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1000; max-width:90vw; max-height:90vh; width:auto; height:auto; border-radius:var(--radius-lg); box-shadow:0 32px 80px rgba(0,0,0,0.5); cursor:zoom-out; }
+.taste-preview-img.active { display:block; }
+.taste-expand-close { display:none; position:fixed; top:16px; right:16px; z-index:1001; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.15); border:none; color:white; font-size:16px; cursor:pointer; align-items:center; justify-content:center; backdrop-filter:blur(4px); transition:background 0.15s; }
+.taste-expand-close:hover { background:rgba(255,255,255,0.28); }
+body.taste-expanded #taste-close-btn { display:flex; }
+
+/* iPad */
+@media(max-width:900px) {
+  .shell { padding-left:24px; padding-right:24px; }
+  .header { padding-left:24px; padding-right:24px; }
+  .tabs { padding-left:24px; padding-right:24px; }
+  .cards { grid-template-columns:repeat(2,1fr); }
+  .taste-grid { grid-template-columns:repeat(3,1fr); }
+}
+
+/* Mobile */
+@media(max-width:600px) {
+  .header { padding-left:16px; padding-right:16px; padding-top:20px; }
+  .shell { padding-left:16px; padding-right:16px; padding-bottom:48px; }
+  .tabs { padding-left:16px; padding-right:16px; }
+  .header-title { font-size:22px; }
+  .header-right { display:none; }
+  .stats { grid-template-columns:repeat(3,1fr); gap:8px; }
+  .stat-n { font-size:24px; }
+  .cards { grid-template-columns:1fr; }
+  .taste-grid { grid-template-columns:repeat(2,1fr); }
+  .idea-card { flex-direction:column; gap:10px; }
+  .idea-card-right { flex-direction:row; align-items:center; width:100%; justify-content:space-between; }
+  .add-box { padding:16px; }
+  .field-textarea { height:70px; }
+  .add-footer { flex-direction:column; gap:10px; align-items:flex-start; }
+  .add-footer .btn-primary { width:100%; justify-content:center; }
+  .breadcrumb { font-size:11px; }
+  .tab { font-size:13px; padding:10px 12px; }
+  .idea-list { gap:8px; }
+  .taste-preview-img { max-width:96vw; max-height:85vh; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div class="breadcrumb">Isha's content vault</div>
+      <div class="header-title">Release Output</div>
+      <div class="header-sub">Save · Summarize · Publish</div>
+    </div>
+    <div class="header-right">
+      <button class="btn-primary" onclick="document.getElementById('text-input').focus();window.scrollTo({top:0,behavior:'smooth'})">+ Add content</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab active" id="tab-btn-0" onclick="switchTab(0)">All saves</button>
+    <button class="tab" id="tab-btn-1" onclick="switchTab(1)">Article ideas</button>
+    <button class="tab" id="tab-btn-2" onclick="switchTab(2)">Taste</button>
+  </div>
+</div>
+
+<div class="shell">
+
+  <div class="nudge" id="nudge">You have unread saves older than 3 days — time to review!</div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card"><div class="stat-n" id="s-total">0</div><div class="stat-l">Saved</div></div>
+    <div class="stat-card"><div class="stat-n" id="s-reviewed">0</div><div class="stat-l">Reviewed</div></div>
+    <div class="stat-card"><div class="stat-n" id="s-topics">0</div><div class="stat-l">Topics</div></div>
+  </div>
+
+  <!-- Add box -->
+  <div class="add-box">
+    <div class="add-box-label">Add content</div>
+    <div class="add-field">
+      <label class="add-field-label">Text / paste content</label>
+      <textarea id="text-input" class="field-textarea" placeholder="Paste article text, LinkedIn post, Instagram caption, reel transcript..."></textarea>
+    </div>
+    <div class="add-field">
+      <label class="add-field-label">URL for reference</label>
+      <input type="text" id="url-input" class="field-input" placeholder="https://..." />
+    </div>
+    <div class="add-field">
+      <label class="add-field-label">Image or screenshot</label>
+      <div class="img-toggle">
+        <button class="img-toggle-btn active" id="toggle-article" onclick="setImgMode('article')">Article</button>
+        <button class="img-toggle-btn" id="toggle-taste" onclick="setImgMode('taste')">Taste</button>
+      </div>
+      <input type="file" id="img-input" accept="image/*" class="field-file" />
+      <div id="img-mode-hint" style="font-size:11px;color:var(--text3);margin-top:4px">Image will be summarized and added to All Saves + Article Ideas</div>
+    </div>
+    <div class="add-footer">
+      <span class="add-footer-hint">Add any or all fields, then save</span>
+      <button class="btn-primary" id="save-btn" onclick="saveAll()">Save & summarize ↗</button>
+    </div>
+    <div class="err" id="err-box"></div>
+  </div>
+
+  <!-- Tab 0: All saves -->
+  <div id="tab-saves">
+    <div class="toolbar">
+      <div class="pills" id="save-filters"><button class="pill active" onclick="setFilter('all',this)">All</button></div>
+      <span id="list-label" style="font-size:12px;color:var(--text3)"></span>
+    </div>
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <!-- Tab 1: Article ideas -->
+  <div id="tab-ideas" class="ideas-view">
+    <div class="ideas-toolbar">
+      <h2>Article ideas</h2>
+      <button class="btn-secondary" style="height:34px;font-size:12px" onclick="refreshIdeas()">Refresh ↗</button>
+    </div>
+    <div class="pills" id="idea-filters" style="margin-bottom:16px">
+      <button class="pill active" onclick="setIdeaFilter('all',this)">All</button>
+    </div>
+    <div id="idea-list" class="idea-list"></div>
+  </div>
+
+  <!-- Tab 2: Taste moodboard -->
+  <div id="tab-taste" style="display:none">
+    <div id="taste-dropzone" class="taste-dropzone">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em;line-height:1.1">Moodboard</div>
+          <div id="taste-count" style="font-size:12px;color:var(--text3);margin-top:4px"></div>
+        </div>
+        <label for="taste-upload" class="taste-add-btn">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v10M3 7l5-5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 14h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Add images
+        </label>
+        <input type="file" id="taste-upload" accept="image/*" multiple style="display:none" onchange="addTasteImages(this)">
+      </div>
+      <div id="taste-grid" class="taste-grid"></div>
+      <button class="taste-expand-close" id="taste-close-btn" onclick="collapseImage()">✕</button>
+      <div id="taste-drop-overlay" class="taste-drop-overlay"></div>
+    <div class="taste-preview-backdrop" id="taste-backdrop" onclick="collapseImage()"></div>
+    <img class="taste-preview-img" id="taste-preview-img" onclick="collapseImage()" alt="preview">
+    </div>
+  </div>
+
+</div>
+
+<script>
+const KEY = 'isha_vault_v5';
+let items = [];
+let saveFilter = 'all';
+let ideaFilter = 'all';
+let activeTab = 0;
+const TYPE_COLORS = { url:'#6366f1', text:'#10b981', image:'#f59e0b' };
+
+let expandedEl = null;
+
+function toggleExpandImage(el){
+  if(expandedEl && expandedEl !== el) collapseImage();
+  if(el.classList.contains('expanded')){
+    collapseImage();
+  } else {
+    const img=el.querySelector('img');
+    if(!img) return;
+    el.classList.add('expanded');
+    document.body.classList.add('taste-expanded');
+    const previewImg=document.getElementById('taste-preview-img');
+    const backdrop=document.getElementById('taste-backdrop');
+    previewImg.src=img.src;
+    previewImg.classList.add('active');
+    backdrop.classList.add('active');
+    expandedEl=el;
+  }
+}
+
+function collapseImage(){
+  if(expandedEl){ expandedEl.classList.remove('expanded'); expandedEl=null; }
+  document.body.classList.remove('taste-expanded');
+  const previewImg=document.getElementById('taste-preview-img');
+  const backdrop=document.getElementById('taste-backdrop');
+  if(previewImg){ previewImg.classList.remove('active'); previewImg.src=''; }
+  if(backdrop) backdrop.classList.remove('active');
+}
+
+// Close on Escape key
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') collapseImage(); });
+
+function load(){
+  try{ const r=localStorage.getItem(KEY); if(r) items=JSON.parse(r); }catch(e){ items=[]; }
+  loadTaste();
+  render(); renderIdeas(); checkNudge();
+}
+function persist(){ localStorage.setItem(KEY, JSON.stringify(items)); }
+
+function switchTab(n){
+  activeTab=n;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  document.getElementById('tab-saves').style.display = n===0?'block':'none';
+  document.getElementById('tab-ideas').style.display = n===1?'block':'none';
+  document.getElementById('tab-taste').style.display = n===2?'block':'none';
+  document.querySelector('.add-box').style.display = n===0?'block':'none';
+  document.querySelector('.stats').style.display = n===0?'grid':'none';
+  if(n===1) renderIdeas();
+  if(n===2){ renderTaste(); setTimeout(initTasteDropzone,0); }
+}
+
+let imgMode = 'article';
+function setImgMode(mode){
+  imgMode = mode;
+  document.getElementById('toggle-article').classList.toggle('active', mode==='article');
+  document.getElementById('toggle-taste').classList.toggle('active', mode==='taste');
+  document.getElementById('img-mode-hint').textContent = mode==='article'
+    ? 'Image will be summarized and added to All Saves + Article Ideas'
+    : 'Image will be saved directly to your Taste moodboard';
+}
+
+function checkNudge(){
+  const unread=items.filter(i=>!i.reviewed);
+  if(!unread.length) return;
+  const oldest=Math.min(...unread.map(i=>i.addedAt));
+  if(Math.floor((Date.now()-oldest)/86400000)>=3)
+    document.getElementById('nudge').style.display='flex';
+}
+
+/* ---- SAVE TAB RENDER ---- */
+function render(){
+  const filtered = saveFilter==='all' ? items : items.filter(i=>i.topic===saveFilter);
+  const topics = [...new Set(items.filter(i=>i.topic).map(i=>i.topic))];
+  document.getElementById('s-total').textContent = items.length;
+  document.getElementById('s-reviewed').textContent = items.filter(i=>i.reviewed).length;
+  document.getElementById('s-topics').textContent = topics.length;
+  document.getElementById('list-label').textContent = filtered.length+' item'+(filtered.length!==1?'s':'');
+
+  const fp=document.getElementById('save-filters');
+  fp.innerHTML=`<button class="pill ${saveFilter==='all'?'active':''}" onclick="setFilter('all',this)">All</button>`;
+  topics.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='pill'+(saveFilter===t?' active':'');
+    b.textContent=t; b.onclick=function(){setFilter(t,this);};
+    fp.appendChild(b);
+  });
+
+  const cl=document.getElementById('cards');
+  if(!filtered.length){
+    cl.innerHTML='<div class="empty"><div style="font-size:32px">📎</div><p>Nothing saved yet. Paste content above to get started.</p></div>';
+    return;
+  }
+  cl.innerHTML=filtered.slice().reverse().map((item,idx)=>{
+    const ri=items.indexOf(item);
+    const cardNum=items.length-ri;
+    const date=new Date(item.addedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    const tc=TYPE_COLORS[item.type]||'#6366f1';
+    const preview=item.summary?(item.summary.length>120?item.summary.slice(0,120)+'...':item.summary):'Processing...';
+    const platform=getPlatform(item.url);
+    const copyText=`${item.title||''}\n\n${item.summary||''}${item.brief?'\n\nArticle idea: '+item.brief.title:''}`;
+    const cardClick=item.brief?`onclick="goToIdea(${ri})"`:'' ;
+    return `<div class="save-card${item.reviewed?' reviewed':''}" ${cardClick} style="${item.brief?'cursor:pointer;':''}">
+      <div class="card-bar" style="background:${tc}"></div>
+      <div class="card-badges">
+        <span class="card-num">#${cardNum}</span>
+        ${item.topic?`<span class="badge badge-${item.topic}">${item.topic}</span>`:''}
+        ${platform?`<span class="platform-tag">${platform}</span>`:``}
+      </div>
+      <div class="card-title">${item.title||'Untitled'}</div>
+      <div class="card-preview">${preview}</div>
+      ${item.url?`<div style="font-size:11px;color:var(--text3);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a href="${item.url}" target="_blank" onclick="event.stopPropagation()" style="color:var(--sky);text-decoration:none;transition:color 0.12s" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${item.url.replace(/^https?:\/\//,'').slice(0,55)}${item.url.length>60?'...':''}</a></div>`:''}
+      <div class="card-foot">
+        <span class="card-date">${date}</span>
+        <div class="card-actions">
+          <button class="act${item.reviewed?' ok':''}" onclick="toggleReview(${ri})">${item.reviewed?'✓ Done':'Mark read'}</button>
+          <button class="card-icon-btn copy-btn" title="Copy" onclick="copyCard(this,'${ri}','${encodeURIComponent(copyText)}')"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3a2 2 0 0 0-2-2H3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.5"/></svg></button>
+          <button class="card-icon-btn del-btn" title="Delete" onclick="del(${ri})"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function goToIdea(ri){
+  switchTab(1);
+  document.getElementById('tab-btn-1').click();
+  setTimeout(()=>{
+    const el=document.getElementById('idea-'+items[ri].id);
+    if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); expandIdea(items[ri].id); }
+  },100);
+}
+
+function setFilter(f,el){
+  saveFilter=f;
+  document.querySelectorAll('#save-filters .pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+function toggleReview(i){ items[i].reviewed=!items[i].reviewed; persist(); render(); }
+function del(i){ items.splice(i,1); persist(); render(); renderIdeas(); }
+function showErr(msg){ const b=document.getElementById('err-box'); b.textContent=msg; b.style.display='block'; setTimeout(()=>b.style.display='none',4000); }
+
+/* ---- IDEAS TAB RENDER ---- */
+function renderIdeas(){
+  const withBrief = items.filter(i=>i.brief);
+  const topics = [...new Set(withBrief.filter(i=>i.topic).map(i=>i.topic))];
+
+  const fp=document.getElementById('idea-filters');
+  fp.innerHTML=`<button class="pill ${ideaFilter==='all'?'active':''}" onclick="setIdeaFilter('all',this)">All</button>`;
+  topics.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='pill'+(ideaFilter===t?' active':'');
+    b.textContent=t; b.onclick=function(){setIdeaFilter(t,this);};
+    fp.appendChild(b);
+  });
+
+  const filtered = ideaFilter==='all' ? withBrief : withBrief.filter(i=>i.topic===ideaFilter);
+  const il=document.getElementById('idea-list');
+
+  if(!filtered.length){
+    il.innerHTML='<div class="ideas-empty"><div style="font-size:32px">💡</div><p>Save some content first and article ideas will appear here automatically.</p></div>';
+    return;
+  }
+
+  il.innerHTML = filtered.slice().reverse().map(item=>{
+    const b=item.brief;
+    const fmtClass='format-'+(b.format||'LinkedIn');
+    const ri=items.indexOf(item);
+    const cardNum=items.length-ri;
+    const platform=getPlatform(item.url);
+    const copyText=`${b.title||item.title||''}\n\nAngle: ${b.angle||''}\n\nKey points:\n${(b.keyPoints||[]).join('\n')}`;
+    return `<div>
+      <div class="idea-card" id="idea-${item.id}" onclick="expandIdea(${item.id})">
+        <div class="idea-card-left">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+            <span class="card-num">#${cardNum}</span>
+            ${item.topic?`<span class="badge badge-${item.topic}">${item.topic}</span>`:''}
+            <span class="format-tag ${fmtClass}">${b.format||'LinkedIn'}</span>
+            ${platform&&platform!==b.format?`<span class="platform-tag">${platform}</span>`:''}
+          </div>
+          <div class="idea-title">${b.title||item.title||'Untitled'}</div>
+          <div class="idea-subtext">${b.angle||''}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+            ${(b.keyPoints||[]).map(p=>`<span style="font-size:11px;color:var(--text3)">· ${p}</span>`).join('')}
+          </div>
+        </div>
+        <div class="idea-card-right" style="display:flex;align-items:center;gap:6px">
+          <button class="card-icon-btn copy-btn" title="Copy idea" onclick="event.stopPropagation();copyCard(this,${ri},'${encodeURIComponent(copyText)}')"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3a2 2 0 0 0-2-2H3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.5"/></svg></button>
+          <button class="card-icon-btn del-btn" title="Delete" onclick="event.stopPropagation();del(${ri})"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="idea-expanded" id="expand-${item.id}"></div>
+    </div>`;
+  }).join('');
+}
+
+function setIdeaFilter(f,el){
+  ideaFilter=f;
+  document.querySelectorAll('#idea-filters .pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderIdeas();
+}
+
+let expandedId = null;
+
+function expandIdea(id){
+  // Collapse previously open
+  if(expandedId && expandedId!==id){
+    const prev=document.getElementById('expand-'+expandedId);
+    const prevCard=document.getElementById('idea-'+expandedId);
+    if(prev){ prev.classList.remove('open'); prev.innerHTML=''; }
+    if(prevCard) prevCard.classList.remove('expanded');
+  }
+
+  const expDiv=document.getElementById('expand-'+id);
+  const card=document.getElementById('idea-'+id);
+  if(!expDiv||!card) return;
+
+  // Toggle
+  if(expDiv.classList.contains('open')){
+    expDiv.classList.remove('open'); expDiv.innerHTML='';
+    card.classList.remove('expanded');
+    expandedId=null; return;
+  }
+
+  card.classList.add('expanded');
+  expandedId=id;
+  const item=items.find(i=>i.id===id);
+  if(!item) return;
+
+  // If full article already generated
+  if(item.fullArticle){
+    renderFullArticle(expDiv, item.fullArticle);
+    expDiv.classList.add('open'); return;
+  }
+
+  // Generate it
+  expDiv.innerHTML=`<div class="generating-msg"><div class="spin"></div>Generating full article brief...</div>`;
+  expDiv.classList.add('open');
+  generateFullArticle(item).then(result=>{
+    if(result){ item.fullArticle=result; persist(); }
+    renderFullArticle(expDiv, result||{});
+  });
+}
+
+function renderFullArticle(container, a){
+  const pts=(a.keyPoints||[]).map(p=>`<li>${p}</li>`).join('');
+  container.innerHTML=`
+    ${a.hook?`<div class="article-hook">${a.hook}</div>`:''}
+    ${a.intro?`<div class="article-section"><div class="article-section-label">Introduction</div><div class="article-section-content">${a.intro}</div></div>`:''}
+    ${pts?`<div class="article-section"><div class="article-section-label">Key points to cover</div><ul class="key-points">${pts}</ul></div>`:''}
+    ${a.body?`<div class="article-section"><div class="article-section-label">Core argument</div><div class="article-section-content">${a.body}</div></div>`:''}
+    ${a.conclusion?`<div class="article-section"><div class="article-section-label">Conclusion</div><div class="article-conclusion">${a.conclusion}</div></div>`:''}
+  `;
+}
+
+async function generateFullArticle(item){
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,
+        messages:[{role:'user',content:`You are a content strategist writing for Isha — a sharp strategist, leader, and personal brand builder moving from Mumbai to Milan. Her voice: confident, direct, warm, never try-hard. She loves: strategy, leadership, automotive/F1, branding, tech, mindset.
+
+Based on this saved content:
+Title: ${item.title}
+Summary: ${item.summary}
+Article angle: ${item.brief?.angle||''}
+Format: ${item.brief?.format||'LinkedIn'}
+
+Write a full article brief. Return ONLY valid JSON:
+{
+  "hook": string (one powerful opening line that stops the scroll, max 120 chars),
+  "intro": string (2-3 sentences setting up the argument, written in Isha's voice),
+  "keyPoints": array of 4 strings (the key ideas/arguments, each 1-2 sentences, punchy),
+  "body": string (3-4 sentences expanding the core argument with Isha's perspective),
+  "conclusion": string (2-3 sentences — insight + call to action or reflection, ends strong)
+}
+
+Return ONLY JSON. No markdown.`}]})
+    });
+    const data=await res.json();
+    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const clean=text.replace(/```json\n?/g,'').replace(/\n?```/g,'').trim();
+    return JSON.parse(clean);
+  }catch(e){ return null; }
+}
+
+async function refreshIdeas(){ renderIdeas(); }
+
+/* ---- SAVE ALL ---- */
+async function callAI(prompt, imageB64, imageMime){
+  const content=[];
+  if(imageB64) content.push({type:'image',source:{type:'base64',media_type:imageMime,data:imageB64}});
+  content.push({type:'text',text:prompt});
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content}]})
+  });
+  const data=await res.json();
+  const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+  const clean=text.replace(/```json\n?/g,'').replace(/\n?```/g,'').trim();
+  try{ return JSON.parse(clean); }catch(e){ return null; }
+}
+
+function buildPrompt(source){
+  return `You are a content intelligence assistant for Isha — a strategist, leader, and personal brand builder who loves: strategy, leadership, automotive/cars, F1, branding, tech, mindset. Moving to Milan for a Master's in Strategic Design.
+
+Analyze this content and return ONLY valid JSON:
+{
+  "title": string (punchy title, max 70 chars),
+  "summary": string (2-3 crisp sentences, the core insight, max 220 chars),
+  "topic": string (one of: Strategy, Leadership, Automotive, F1, Branding, Tech, Mindset, Other),
+  "brief": {
+    "title": string (compelling post/article title, max 65 chars),
+    "angle": string (unique hook — why this, why now, why Isha, max 120 chars),
+    "keyPoints": array of 3 strings (key ideas to cover, each max 60 chars),
+    "format": string (one of: LinkedIn, Substack, Both)
+  }
+}
+
+Content: ${source}
+
+Return ONLY the JSON. No markdown, no extra text.`;
+}
+
+async function saveAll(){
+  const url=document.getElementById('url-input').value.trim();
+  const text=document.getElementById('text-input').value.trim();
+  const file=document.getElementById('img-input').files[0];
+  if(!url&&!text&&!file){ showErr('Add at least one field.'); return; }
+
+  const btn=document.getElementById('save-btn');
+  btn.disabled=true; btn.textContent='Saving...';
+
+  const saves=[];
+  if(url&&text){
+    const fullUrl=url.startsWith('http')?url:'https://'+url;
+    const id=Date.now();
+    items.push({id,url:fullUrl,title:'',summary:'',topic:'',brief:null,reviewed:false,addedAt:id,type:'url'});
+    saves.push({id,prompt:buildPrompt('Source: '+fullUrl+'\n\nContent:\n'+text)});
+  } else if(url){
+    const fullUrl=url.startsWith('http')?url:'https://'+url;
+    const id=Date.now();
+    items.push({id,url:fullUrl,title:'',summary:'',topic:'',brief:null,reviewed:false,addedAt:id,type:'url'});
+    saves.push({id,prompt:buildPrompt('URL: '+fullUrl)});
+  } else if(text){
+    const id=Date.now()+1;
+    items.push({id,url:'',title:'',summary:'',topic:'',brief:null,reviewed:false,addedAt:id,type:'text'});
+    saves.push({id,prompt:buildPrompt('Content:\n'+text)});
+  }
+  if(file){
+    if(imgMode==='taste'){
+      // Save to taste moodboard directly
+      const reader=new FileReader();
+      reader.onload=e=>{
+        tasteItems.push({data:e.target.result,name:file.name,addedAt:Date.now()});
+        persistTaste();
+        document.getElementById('img-input').value='';
+        // auto-switch to taste tab to show it
+        switchTab(2);
+        document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===2));
+      };
+      reader.readAsDataURL(file);
+    } else {
+      const id=Date.now()+2;
+      items.push({id,url:'',title:'',summary:'',topic:'',brief:null,reviewed:false,addedAt:id,type:'image'});
+      saves.push({id,file,prompt:buildPrompt('Analyze this image and summarize what you see.')});
+    }
+  }
+
+  persist(); render();
+
+  await Promise.all(saves.map(async s=>{
+    try{
+      const p = s.file
+        ? await callAI(s.prompt, await toB64(s.file), s.file.type)
+        : await callAI(s.prompt);
+      const ri=items.findIndex(i=>i.id===s.id);
+      if(ri>-1&&p) Object.assign(items[ri],p);
+      else if(ri>-1) items[ri].summary='Could not summarize.';
+    }catch(e){
+      const ri=items.findIndex(i=>i.id===s.id);
+      if(ri>-1) items[ri].summary='Error processing.';
+    }
+  }));
+
+  persist(); render(); renderIdeas();
+  document.getElementById('url-input').value='';
+  document.getElementById('text-input').value='';
+  document.getElementById('img-input').value='';
+  btn.disabled=false; btn.textContent='Save & summarize ↗';
+}
+
+function toB64(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.onerror=rej; r.readAsDataURL(file); }); }
+function addLoader(label){
+  const cl=document.getElementById('cards'); const id='ld-'+Date.now();
+  const d=document.createElement('div'); d.className='loading-card'; d.id=id;
+  d.innerHTML=`<div class="spin"></div><div class="load-text">Processing <b>${label}</b>...</div>`;
+  cl.prepend(d); return id;
+}
+function removeLoader(id){ const el=document.getElementById(id); if(el) el.remove(); }
+
+const TASTE_KEY = 'isha_taste_v1';
+let tasteItems = [];
+
+function loadTaste(){
+  try{ const r=localStorage.getItem(TASTE_KEY); if(r) tasteItems=JSON.parse(r); }catch(e){ tasteItems=[]; }
+}
+function persistTaste(){ localStorage.setItem(TASTE_KEY, JSON.stringify(tasteItems)); }
+
+function renderTaste(){
+  const grid=document.getElementById('taste-grid');
+  const count=document.getElementById('taste-count');
+  count.textContent=tasteItems.length+' image'+(tasteItems.length!==1?'s':'');
+  if(!tasteItems.length){ grid.innerHTML=''; return; }
+  grid.innerHTML=tasteItems.slice().reverse().map((item,idx)=>{
+    const ri=tasteItems.length-1-idx;
+    const fontLabel=item.font?`<div class="taste-font-label">${item.font}</div>`:'';
+    return `<div class="taste-item" onclick="toggleExpandImage(this)">
+      <img src="${item.data}" alt="${item.name||''}" style="width:100%;height:100%;object-fit:cover;display:block;">
+      <div class="taste-item-overlay"></div>
+      ${fontLabel}
+      <div class="taste-item-actions">
+        <button class="taste-icon-btn" title="Download" onclick="event.stopPropagation();saveTasteImage(${ri})">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M4 7l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 14h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <button class="taste-icon-btn" title="Delete" onclick="event.stopPropagation();deleteTaste(${ri})">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveTasteImage(ri){
+  const item=tasteItems[tasteItems.length-1-ri];
+  if(!item) return;
+  const a=document.createElement('a');
+  a.href=item.data; a.download=item.name||'image.jpg'; a.click();
+}
+
+function addTasteImages(input){
+  const files=Array.from(input.files||[]);
+  if(!files.length) return;
+  let done=0;
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      const item={data:e.target.result,name:file.name,addedAt:Date.now(),font:''};
+      tasteItems.push(item);
+      done++;
+      if(done===files.length){ persistTaste(); renderTaste(); }
+      try{
+        const b64=e.target.result.split(',')[1];
+        const res=await fetch('https://api.anthropic.com/v1/messages',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:80,
+            messages:[{role:'user',content:[
+              {type:'image',source:{type:'base64',media_type:file.type,data:b64}},
+              {type:'text',text:'If you can identify a specific font or typeface in this image, reply with ONLY the font name. If no font is identifiable, reply with exactly: none'}
+            ]}]})
+        });
+        const data=await res.json();
+        const fontName=((data.content||[])[0]?.text||'').trim();
+        if(fontName&&fontName.toLowerCase()!=='none'&&fontName.length<60){
+          item.font=fontName; persistTaste(); renderTaste();
+        }
+      }catch(e){}
+    };
+    reader.readAsDataURL(file);
+  });
+  if(input.value!==undefined) input.value='';
+}
+
+function initTasteDropzone(){
+  const zone=document.getElementById('taste-dropzone');
+  if(!zone||zone._dz) return;
+  zone._dz=true;
+  let n=0;
+  zone.addEventListener('dragenter',e=>{e.preventDefault();n++;zone.classList.add('dragging');});
+  zone.addEventListener('dragleave',e=>{e.preventDefault();n--;if(n<=0){n=0;zone.classList.remove('dragging');}});
+  zone.addEventListener('dragover',e=>e.preventDefault());
+  zone.addEventListener('drop',e=>{
+    e.preventDefault();n=0;zone.classList.remove('dragging');
+    const files=Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+    if(files.length) addTasteImages({files});
+  });
+}
+
+function deleteTaste(ri){
+  tasteItems.splice(tasteItems.length-1-ri,1);
+  persistTaste(); renderTaste();
+}
+
+function getPlatform(url){
+  if(!url) return '';
+  try{
+    const h=new URL(url).hostname.replace('www.','');
+    if(h.includes('linkedin')) return 'LinkedIn';
+    if(h.includes('instagram')) return 'Instagram';
+    if(h.includes('substack')) return 'Substack';
+    if(h.includes('twitter')||h.includes('x.com')) return 'X';
+    if(h.includes('youtube')) return 'YouTube';
+    if(h.includes('medium')) return 'Medium';
+    if(h.includes('notion')) return 'Notion';
+    if(h.includes('tiktok')) return 'TikTok';
+    const parts=h.split('.');
+    return parts.length>=2?parts[parts.length-2]:'';
+  }catch(e){ return ''; }
+}
+
+function copyCard(btn, ri, encoded){
+  const text=decodeURIComponent(encoded);
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.classList.add('copied');
+    btn.innerHTML='<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML='<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3a2 2 0 0 0-2-2H3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.5"/></svg>'; },2000);
+  }).catch(()=>{ btn.textContent='!'; setTimeout(()=>btn.textContent='⎘',1500); });
+}
+
+load();
+</script>
+</body>
+</html>
