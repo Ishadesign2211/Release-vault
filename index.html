@@ -254,9 +254,6 @@ body.taste-expanded #taste-close-btn { display:flex; }
 </head>
 <body>
 
-<div id="app-loading" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;font-family:'Inter',sans-serif;font-size:13px;color:var(--text3);">
-  <div style="display:flex;align-items:center;gap:10px"><div style="width:16px;height:16px;border:2px solid #ddd;border-top-color:#1a1a1a;border-radius:50%;animation:spin 0.7s linear infinite"></div>Loading your vault...</div>
-</div>
 <div class="header">
   <div class="header-inner">
     <div>
@@ -362,26 +359,8 @@ body.taste-expanded #taste-close-btn { display:flex; }
 </div>
 
 <script>
-// ── Supabase config ──────────────────────────────────────────────
-const SUPA_URL = 'https://kmoferqywvamywnvgiuf.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttb2ZlcnF5d3ZhbXl3bnZnaXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NjgwMDUsImV4cCI6MjA5NjM0NDAwNX0.94JbV6R1B2ud1EbGWEH_XPt2u7jNDJmEFWakmH1Uc5M';
-const SUPA_HEADERS = {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY};
-
-async function supaGet(table){
-  const r=await fetch(`${SUPA_URL}/rest/v1/${table}?select=*&order=created_at.asc`,{headers:SUPA_HEADERS});
-  return r.ok?r.json():[];
-}
-async function supaUpsert(table,row){
-  const r=await fetch(`${SUPA_URL}/rest/v1/${table}`,{method:'POST',headers:{...SUPA_HEADERS,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(row)});
-  return r.ok;
-}
-async function supaDelete(table,id){
-  const r=await fetch(`${SUPA_URL}/rest/v1/${table}?id=eq.${id}`,{method:'DELETE',headers:SUPA_HEADERS});
-  return r.ok;
-}
-
-// ── App state ────────────────────────────────────────────────────
 const KEY = 'isha_vault_v5';
+const TASTE_KEY = 'isha_taste_v1';
 let items = [];
 let tasteItems = [];
 let saveFilter = 'all';
@@ -421,87 +400,17 @@ function collapseImage(){
 // Close on Escape key
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') collapseImage(); });
 
-async function load(){
-  try{
-    // Try Supabase first
-    const [savedItems, savedTaste] = await Promise.all([
-      supaGet('vault_items'),
-      supaGet('taste_items')
-    ]);
-    if(savedItems && savedItems.length>=0){
-      items = savedItems.map(r=>({
-        id:r.id, url:r.url||'', title:r.title||'', summary:r.summary||'',
-        topic:r.topic||'', brief:r.brief?JSON.parse(r.brief):null,
-        fullArticle:r.full_article?JSON.parse(r.full_article):null,
-        reviewed:r.reviewed||false, addedAt:new Date(r.created_at).getTime(),
-        type:r.type||'url', supa:true
-      }));
-    }
-    if(savedTaste && savedTaste.length>=0){
-      tasteItems = savedTaste.map(r=>({
-        id:r.id, data:r.data||'', name:r.name||'',
-        font:r.font||'', addedAt:new Date(r.created_at).getTime(), supa:true
-      }));
-    }
-    // Migrate any localStorage items not yet in Supabase
-    try{
-      const local=localStorage.getItem(KEY);
-      if(local){
-        const localItems=JSON.parse(local);
-        for(const li of localItems){
-          if(!items.find(i=>i.addedAt===li.addedAt)){
-            items.push(li); await persistItem(li);
-          }
-        }
-        localStorage.removeItem(KEY);
-      }
-      const localTaste=localStorage.getItem('isha_taste_v1');
-      if(localTaste){
-        const lt=JSON.parse(localTaste);
-        for(const ti of lt){
-          if(!tasteItems.find(i=>i.name===ti.name&&i.addedAt===ti.addedAt)){
-            tasteItems.push(ti); await persistTasteItem(ti);
-          }
-        }
-        localStorage.removeItem('isha_taste_v1');
-      }
-    }catch(e){}
-  }catch(e){
-    // Supabase unavailable — fall back to localStorage
-    try{ const r=localStorage.getItem(KEY); if(r) items=JSON.parse(r); }catch(e2){ items=[]; }
-    try{ const r=localStorage.getItem('isha_taste_v1'); if(r) tasteItems=JSON.parse(r); }catch(e2){ tasteItems=[]; }
-  }
+function load(){
+  try{ const r=localStorage.getItem(KEY); if(r) items=JSON.parse(r); }catch(e){ items=[]; }
+  try{ const r=localStorage.getItem(TASTE_KEY); if(r) tasteItems=JSON.parse(r); }catch(e){ tasteItems=[]; }
   render(); renderIdeas(); checkNudge();
-  const loader=document.getElementById('app-loading');
-  if(loader) loader.style.display='none';
 }
 
-async function persistItem(item){
-  const row={
-    id:item.id, url:item.url||'', title:item.title||'', summary:item.summary||'',
-    topic:item.topic||'', brief:item.brief?JSON.stringify(item.brief):null,
-    full_article:item.fullArticle?JSON.stringify(item.fullArticle):null,
-    reviewed:item.reviewed||false, type:item.type||'url'
-  };
-  await supaUpsert('vault_items', row);
-}
-
-async function deleteItem(item){
-  await supaDelete('vault_items', item.id);
-}
-
-async function persistTasteItem(item){
-  const row={ id:item.id, data:item.data||'', name:item.name||'', font:item.font||'' };
-  await supaUpsert('taste_items', row);
-}
-
-async function deleteTasteItem(item){
-  await supaDelete('taste_items', item.id);
-}
-function persist(){
-  // Supabase is source of truth; localStorage is fallback only
-  // Individual item saves happen via persistItem()
-}
+function persistItem(item){ persist(); }
+function deleteItem(item){ persist(); }
+function persistTasteItem(item){ persistTaste(); }
+function deleteTasteItem(item){ persistTaste(); }
+function persist(){ localStorage.setItem(KEY, JSON.stringify(items)); }
 
 function switchTab(n){
   activeTab=n;
@@ -602,17 +511,8 @@ function setFilter(f,el){
   el.classList.add('active');
   render();
 }
-function toggleReview(i){
-  items[i].reviewed=!items[i].reviewed;
-  persistItem(items[i]);
-  render();
-}
-function del(i){
-  const item=items[i];
-  deleteItem(item);
-  items.splice(i,1);
-  render(); renderIdeas();
-}
+function toggleReview(i){ items[i].reviewed=!items[i].reviewed; persist(); render(); }
+function del(i){ items.splice(i,1); persist(); render(); renderIdeas(); }
 function showErr(msg){ const b=document.getElementById('err-box'); b.textContent=msg; b.style.display='block'; setTimeout(()=>b.style.display='none',4000); }
 
 /* ---- IDEAS TAB RENDER ---- */
@@ -714,7 +614,7 @@ function expandIdea(id){
   expDiv.innerHTML=`<div class="generating-msg"><div class="spin"></div>Generating full article brief...</div>`;
   expDiv.classList.add('open');
   generateFullArticle(item).then(result=>{
-    if(result){ item.fullArticle=result; await persistItem(item); }
+    if(result){ item.fullArticle=result; persist(); }
     renderFullArticle(expDiv, result||{});
   });
 }
@@ -877,9 +777,7 @@ function addLoader(label){
 function removeLoader(id){ const el=document.getElementById(id); if(el) el.remove(); }
 
 
-function persistTaste(){
-  // Handled via persistTasteItem()
-}
+function persistTaste(){ localStorage.setItem(TASTE_KEY, JSON.stringify(tasteItems)); }
 
 function renderTaste(){
   const grid=document.getElementById('taste-grid');
@@ -921,9 +819,8 @@ function addTasteImages(input){
     reader.onload=async e=>{
       const item={data:e.target.result,name:file.name,addedAt:Date.now(),font:''};
       tasteItems.push(item);
-      await persistTasteItem(item);
       done++;
-      if(done===files.length){ renderTaste(); }
+      if(done===files.length){ persistTaste(); renderTaste(); }
       try{
         const b64=e.target.result.split(',')[1];
         const res=await fetch('https://api.anthropic.com/v1/messages',{
@@ -937,7 +834,7 @@ function addTasteImages(input){
         const data=await res.json();
         const fontName=((data.content||[])[0]?.text||'').trim();
         if(fontName&&fontName.toLowerCase()!=='none'&&fontName.length<60){
-          item.font=fontName; await persistTasteItem(item); renderTaste();
+          item.font=fontName; persistTaste(); renderTaste();
         }
       }catch(e){}
     };
@@ -962,10 +859,8 @@ function initTasteDropzone(){
 }
 
 function deleteTaste(ri){
-  const item=tasteItems[tasteItems.length-1-ri];
-  deleteTasteItem(item);
   tasteItems.splice(tasteItems.length-1-ri,1);
-  renderTaste();
+  persistTaste(); renderTaste();
 }
 
 function getPlatform(url){
