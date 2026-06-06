@@ -632,7 +632,7 @@ function renderFullArticle(container, a){
 
 async function generateFullArticle(item){
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/api/summarize',{
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,
         messages:[{role:'user',content:`You are a content strategist writing for Isha — a sharp strategist, leader, and personal brand builder moving from Mumbai to Milan. Her voice: confident, direct, warm, never try-hard. She loves: strategy, leadership, automotive/F1, branding, tech, mindset.
@@ -668,7 +668,7 @@ async function callAI(prompt, imageB64, imageMime){
   const content=[];
   if(imageB64) content.push({type:'image',source:{type:'base64',media_type:imageMime,data:imageB64}});
   content.push({type:'text',text:prompt});
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
+  const res=await fetch('/api/summarize',{
     method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content}]})
   });
@@ -823,7 +823,7 @@ function addTasteImages(input){
       if(done===files.length){ persistTaste(); renderTaste(); }
       try{
         const b64=e.target.result.split(',')[1];
-        const res=await fetch('https://api.anthropic.com/v1/messages',{
+        const res=await fetch('/api/summarize',{
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:80,
             messages:[{role:'user',content:[
